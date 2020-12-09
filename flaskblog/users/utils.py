@@ -18,11 +18,17 @@ def save_picture(form_picture):
 
     return picture_fn
 
-
 def send_reset_email(user):
     token = user.get_reset_token()
     message = f'''To reset your password, visit the following link:
     {url_for('users.reset_token', token=token, _external=True)}
     If you did not make this request, then simply ignore this email and no changes will be made.
     '''
-    return requests.post("https://api.mailgun.net/v3/nailasblog.com/messages",auth=("api", current_app.config['API_KEY']),data={"from": "<mailgun@nailasblog.com>","to$
+    
+    response = requests.post("https://api.mailgun.net/v3/nailasblog.com/messages",auth=("api", os.getenv("API_KEY")),data={"from": "<mailgun@nailasblog.com>","to": [user.email, "nailasblog.com"],"subject": "Request to reset password","text": message})
+    if response.status_code == 200:
+        return true
+    else:
+        print("There has been an error sending the email")
+        print(response.data)
+        raise Exception("There has been an error sending the email")
